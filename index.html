@@ -39,7 +39,7 @@
     <div class="info">
         <h1>Globe.gl Example</h1>
         <p>Drag to rotate | Scroll to zoom</p>
-        <p>LA → Bali → Labuan Bajo</p>
+        <p>LA → Taiwan → Bali → Labuan Bajo</p>
     </div>
     <div id="globeViz"></div>
 
@@ -52,11 +52,12 @@
             .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
             .pointOfView({ lat: 39.6, lng: -98.5, altitude: 2 }); // Centered on USA
 
-        // Define specific locations
+        // Define specific locations (flight path)
         const gData = [
-            { lat: 34.05, lng: -118.24, size: 3, color: 'red', label: 'Los Angeles' },
-            { lat: -8.65, lng: 115.22, size: 3, color: 'blue', label: 'Bali' },
-            { lat: -8.50, lng: 119.88, size: 3, color: 'green', label: 'Labuan Bajo' }
+            { lat: 34.05, lng: -118.24, size: 1, color: 'red', label: 'Los Angeles' },
+            { lat: 25.03, lng: 121.56, size: 1, color: 'orange', label: 'Taiwan' },
+            { lat: -8.65, lng: 115.22, size: 1, color: 'blue', label: 'Bali' },
+            { lat: -8.50, lng: 119.88, size: 1, color: 'green', label: 'Labuan Bajo' }
         ];
 
         // Add points to the globe
@@ -66,11 +67,13 @@
             .pointRadius('size')
             .pointsMerge(true);
 
-        // Add arcs connecting the three locations
+        // Add arcs connecting the flight path
         const arcsData = [
-            // LA <-> Bali
-            { startLat: 34.05, startLng: -118.24, endLat: -8.65, endLng: 115.22, color: ['red', 'blue'] },
-            // Bali <-> Labuan Bajo
+            // LA -> Taiwan
+            { startLat: 34.05, startLng: -118.24, endLat: 25.03, endLng: 121.56, color: ['red', 'orange'] },
+            // Taiwan -> Bali
+            { startLat: 25.03, startLng: 121.56, endLat: -8.65, endLng: 115.22, color: ['orange', 'blue'] },
+            // Bali -> Labuan Bajo
             { startLat: -8.65, startLng: 115.22, endLat: -8.50, endLng: 119.88, color: ['blue', 'green'] }
         ];
 
@@ -80,6 +83,16 @@
             .arcDashGap(0.2)
             .arcDashAnimateTime(3000)
             .arcStroke(0.5);
+
+        // Add labels for each location
+        world.labelsData(gData)
+            .labelLat('lat')
+            .labelLng('lng')
+            .labelText('label')
+            .labelSize(1.5)
+            .labelDotRadius(0.4)
+            .labelColor(() => 'rgba(255, 255, 255, 0.75)')
+            .labelResolution(2);
 
         // Auto-rotate the globe
         world.controls().autoRotate = true;
