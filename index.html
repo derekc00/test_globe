@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Globe.gl Simple Example</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #globeViz {
+            width: 100vw;
+            height: 100vh;
+        }
+        .info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+        p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>Globe.gl Example</h1>
+        <p>Drag to rotate | Scroll to zoom</p>
+        <p>Random points on the globe</p>
+    </div>
+    <div id="globeViz"></div>
+
+    <script src="//unpkg.com/globe.gl"></script>
+    <script>
+        // Initialize the globe
+        const world = Globe()
+            (document.getElementById('globeViz'))
+            .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+            .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+            .pointOfView({ lat: 39.6, lng: -98.5, altitude: 2 }); // Centered on USA
+
+        // Generate some random points on the globe
+        const N = 50;
+        const gData = [...Array(N).keys()].map(() => ({
+            lat: (Math.random() - 0.5) * 180,
+            lng: (Math.random() - 0.5) * 360,
+            size: Math.random() * 2,
+            color: ['red', 'white', 'blue', 'green', 'yellow'][Math.round(Math.random() * 4)]
+        }));
+
+        // Add points to the globe
+        world.pointsData(gData)
+            .pointAltitude(0.01)
+            .pointColor('color')
+            .pointRadius('size')
+            .pointsMerge(true);
+
+        // Add arcs connecting random points
+        const arcsData = [...Array(20).keys()].map(() => ({
+            startLat: (Math.random() - 0.5) * 180,
+            startLng: (Math.random() - 0.5) * 360,
+            endLat: (Math.random() - 0.5) * 180,
+            endLng: (Math.random() - 0.5) * 360,
+            color: [
+                ['red', 'white', 'orange', 'yellow'],
+                ['white', 'lightblue', 'cyan', 'green']
+            ][Math.round(Math.random())]
+        }));
+
+        world.arcsData(arcsData)
+            .arcColor('color')
+            .arcDashLength(0.4)
+            .arcDashGap(0.2)
+            .arcDashAnimateTime(3000)
+            .arcStroke(0.5);
+
+        // Auto-rotate the globe
+        world.controls().autoRotate = true;
+        world.controls().autoRotateSpeed = 0.5;
+    </script>
+</body>
+</html>

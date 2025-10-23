@@ -1,0 +1,15 @@
+{
+  "name": "globe-gl-example",
+  "version": "1.0.0",
+  "description": "A simple example using globe.gl",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080"
+  },
+  "dependencies": {
+    "globe.gl": "^2.31.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
