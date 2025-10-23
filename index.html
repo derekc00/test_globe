@@ -3,61 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Globe.gl Simple Example</title>
+    <title>TACTICAL COMMAND DISPLAY</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            font-family: Arial, sans-serif;
+            font-family: 'Orbitron', monospace;
+            background: #000;
+            color: #0f0;
         }
+
         #globeViz {
             width: 100vw;
             height: 100vh;
+            background: #000;
         }
-        .info {
+
+        /* Scanline effect */
+        #globeViz::before {
+            content: '';
             position: absolute;
-            top: 20px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 0, 0.03) 0px,
+                transparent 1px,
+                transparent 2px,
+                rgba(0, 255, 0, 0.03) 3px
+            );
+            pointer-events: none;
+            z-index: 100;
+            animation: scanline 8s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
+        }
+
+        /* Top header */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, rgba(0, 20, 0, 0.9) 0%, transparent 100%);
+            padding: 15px 30px;
+            border-bottom: 2px solid #0f0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+            margin: 0;
+        }
+
+        .status {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #0f0;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 0 10px #0f0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Mission info panel */
+        .mission-panel {
+            position: absolute;
+            top: 80px;
             left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 15px;
-            border-radius: 5px;
+            background: rgba(0, 20, 0, 0.85);
+            border: 2px solid #0f0;
+            padding: 15px 20px;
+            min-width: 300px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
             z-index: 1000;
         }
-        h1 {
+
+        .mission-panel h2 {
+            font-size: 16px;
             margin: 0 0 10px 0;
-            font-size: 24px;
+            color: #0f0;
+            border-bottom: 1px solid #0f0;
+            padding-bottom: 5px;
+            letter-spacing: 2px;
         }
-        p {
-            margin: 5px 0;
+
+        .waypoint {
+            font-size: 12px;
+            padding: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+            letter-spacing: 1px;
+        }
+
+        .waypoint-name {
+            color: #0ff;
+        }
+
+        .waypoint-coords {
+            color: #0f0;
+            font-size: 10px;
+        }
+
+        /* Bottom corner info */
+        .corner-info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 20, 0, 0.85);
+            border: 2px solid #0f0;
+            padding: 15px 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            z-index: 1000;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .corner-info div {
+            margin: 3px 0;
+        }
+
+        .classified {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #f00;
             font-size: 14px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #f00;
+            border: 2px solid #f00;
+            padding: 8px 15px;
+            background: rgba(20, 0, 0, 0.85);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        /* Grid overlay */
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.15;
         }
     </style>
 </head>
 <body>
-    <div class="info">
-        <h1>Globe.gl Example</h1>
-        <p>Drag to rotate | Scroll to zoom</p>
-        <p>LA → Taiwan → Bali → Labuan Bajo</p>
+    <div class="header">
+        <h1>⬢ TACTICAL COMMAND DISPLAY</h1>
+        <div class="status">
+            <div class="status-item">
+                <div class="status-dot"></div>
+                <span>SYSTEMS ONLINE</span>
+            </div>
+            <div class="status-item">
+                <span>UTC: <span id="utc-time"></span></span>
+            </div>
+        </div>
     </div>
+
+    <div class="mission-panel">
+        <h2>⬢ MISSION FLIGHT PATH</h2>
+        <div class="waypoint">
+            <span class="waypoint-name">WP-01: LOS ANGELES</span>
+            <span class="waypoint-coords">34.05°N 118.24°W</span>
+        </div>
+        <div class="waypoint">
+            <span class="waypoint-name">WP-02: TAIWAN</span>
+            <span class="waypoint-coords">25.03°N 121.56°E</span>
+        </div>
+        <div class="waypoint">
+            <span class="waypoint-name">WP-03: BALI</span>
+            <span class="waypoint-coords">8.65°S 115.22°E</span>
+        </div>
+        <div class="waypoint">
+            <span class="waypoint-name">WP-04: LABUAN BAJO</span>
+            <span class="waypoint-coords">8.50°S 119.88°E</span>
+        </div>
+    </div>
+
+    <div class="corner-info">
+        <div>DISPLAY MODE: GLOBE</div>
+        <div>PROJECTION: ORTHOGRAPHIC</div>
+        <div>ROTATION: AUTO</div>
+    </div>
+
+    <div class="classified">⬢ CLASSIFIED - TOP SECRET</div>
+
     <div id="globeViz"></div>
 
     <script src="//unpkg.com/globe.gl"></script>
     <script>
-        // Initialize the globe
+        // Update UTC time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('utc-time').textContent = now.toISOString().substr(11, 8);
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Initialize the globe with military theme
         const world = Globe()
             (document.getElementById('globeViz'))
-            .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+            .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
             .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
-            .pointOfView({ lat: 39.6, lng: -98.5, altitude: 2 }); // Centered on USA
+            .showAtmosphere(true)
+            .atmosphereColor('#0f0')
+            .atmosphereAltitude(0.15)
+            .pointOfView({ lat: 20, lng: 80, altitude: 2.5 });
 
-        // Define specific locations (flight path)
+        // Show graticules (lat/long grid lines) - TACTICAL GRID
+        world.showGraticules(true)
+            .graticulesColor('#0f0')
+            .graticulesOpacity(0.3);
+
+        // Define waypoints (flight path)
         const gData = [
-            { lat: 34.05, lng: -118.24, size: 1, color: 'red', label: 'Los Angeles' },
-            { lat: 25.03, lng: 121.56, size: 1, color: 'orange', label: 'Taiwan' },
-            { lat: -8.65, lng: 115.22, size: 1, color: 'blue', label: 'Bali' },
-            { lat: -8.50, lng: 119.88, size: 1, color: 'green', label: 'Labuan Bajo' }
+            { lat: 34.05, lng: -118.24, size: 0.8, color: '#0ff', label: 'WP-01\nLOS ANGELES' },
+            { lat: 25.03, lng: 121.56, size: 0.8, color: '#0ff', label: 'WP-02\nTAIWAN' },
+            { lat: -8.65, lng: 115.22, size: 0.8, color: '#0ff', label: 'WP-03\nBALI' },
+            { lat: -8.50, lng: 119.88, size: 0.8, color: '#0ff', label: 'WP-04\nLABUAN BAJO' }
         ];
 
         // Add points to the globe
@@ -67,36 +276,55 @@
             .pointRadius('size')
             .pointsMerge(true);
 
-        // Add arcs connecting the flight path
+        // Add arcs connecting the flight path - SOLID GLOWING STYLE
         const arcsData = [
             // LA -> Taiwan
-            { startLat: 34.05, startLng: -118.24, endLat: 25.03, endLng: 121.56, color: ['red', 'orange'] },
+            { startLat: 34.05, startLng: -118.24, endLat: 25.03, endLng: 121.56 },
             // Taiwan -> Bali
-            { startLat: 25.03, startLng: 121.56, endLat: -8.65, endLng: 115.22, color: ['orange', 'blue'] },
+            { startLat: 25.03, startLng: 121.56, endLat: -8.65, endLng: 115.22 },
             // Bali -> Labuan Bajo
-            { startLat: -8.65, startLng: 115.22, endLat: -8.50, endLng: 119.88, color: ['blue', 'green'] }
+            { startLat: -8.65, startLng: 115.22, endLat: -8.50, endLng: 119.88 }
         ];
 
         world.arcsData(arcsData)
-            .arcColor('color')
-            .arcDashLength(0.4)
-            .arcDashGap(0.2)
-            .arcDashAnimateTime(3000)
-            .arcStroke(0.5);
+            .arcColor(() => '#0ff')
+            .arcStroke(1.5)
+            .arcDashLength(1)  // Solid line
+            .arcDashGap(0)     // No gaps
+            .arcDashAnimateTime(0)  // No animation on dash
+            .arcAltitude(0.3)
+            .arcAltitudeAutoScale(0.5);
 
-        // Add labels for each location
+        // Add PULSING RINGS at each waypoint location
+        const ringsData = gData.map(d => ({
+            lat: d.lat,
+            lng: d.lng
+        }));
+
+        world.ringsData(ringsData)
+            .ringColor(() => '#0ff')
+            .ringMaxRadius(3)
+            .ringPropagationSpeed(1.5)
+            .ringRepeatPeriod(2000)
+            .ringAltitude(0.01);
+
+        // Add tactical labels with coordinates
         world.labelsData(gData)
             .labelLat('lat')
             .labelLng('lng')
             .labelText('label')
-            .labelSize(1.5)
-            .labelDotRadius(0.4)
-            .labelColor(() => 'rgba(255, 255, 255, 0.75)')
-            .labelResolution(2);
+            .labelSize(1.2)
+            .labelDotRadius(0.5)
+            .labelColor(() => '#0ff')
+            .labelResolution(2)
+            .labelAltitude(0.02);
 
-        // Auto-rotate the globe
+        // Auto-rotate the globe (slower for tactical feel)
         world.controls().autoRotate = true;
-        world.controls().autoRotateSpeed = 0.5;
+        world.controls().autoRotateSpeed = 0.3;
+
+        // Adjust lighting for darker military feel
+        world.scene().add(new THREE.AmbientLight(0x333333, 0.8));
     </script>
 </body>
 </html>
