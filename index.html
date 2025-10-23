@@ -39,7 +39,7 @@
     <div class="info">
         <h1>Globe.gl Example</h1>
         <p>Drag to rotate | Scroll to zoom</p>
-        <p>Random points on the globe</p>
+        <p>LA → Bali → Labuan Bajo</p>
     </div>
     <div id="globeViz"></div>
 
@@ -52,14 +52,12 @@
             .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
             .pointOfView({ lat: 39.6, lng: -98.5, altitude: 2 }); // Centered on USA
 
-        // Generate some random points on the globe
-        const N = 50;
-        const gData = [...Array(N).keys()].map(() => ({
-            lat: (Math.random() - 0.5) * 180,
-            lng: (Math.random() - 0.5) * 360,
-            size: Math.random() * 2,
-            color: ['red', 'white', 'blue', 'green', 'yellow'][Math.round(Math.random() * 4)]
-        }));
+        // Define specific locations
+        const gData = [
+            { lat: 34.05, lng: -118.24, size: 3, color: 'red', label: 'Los Angeles' },
+            { lat: -8.65, lng: 115.22, size: 3, color: 'blue', label: 'Bali' },
+            { lat: -8.50, lng: 119.88, size: 3, color: 'green', label: 'Labuan Bajo' }
+        ];
 
         // Add points to the globe
         world.pointsData(gData)
@@ -68,17 +66,13 @@
             .pointRadius('size')
             .pointsMerge(true);
 
-        // Add arcs connecting random points
-        const arcsData = [...Array(20).keys()].map(() => ({
-            startLat: (Math.random() - 0.5) * 180,
-            startLng: (Math.random() - 0.5) * 360,
-            endLat: (Math.random() - 0.5) * 180,
-            endLng: (Math.random() - 0.5) * 360,
-            color: [
-                ['red', 'white', 'orange', 'yellow'],
-                ['white', 'lightblue', 'cyan', 'green']
-            ][Math.round(Math.random())]
-        }));
+        // Add arcs connecting the three locations
+        const arcsData = [
+            // LA <-> Bali
+            { startLat: 34.05, startLng: -118.24, endLat: -8.65, endLng: 115.22, color: ['red', 'blue'] },
+            // Bali <-> Labuan Bajo
+            { startLat: -8.65, startLng: 115.22, endLat: -8.50, endLng: 119.88, color: ['blue', 'green'] }
+        ];
 
         world.arcsData(arcsData)
             .arcColor('color')
